@@ -62,6 +62,9 @@ export default function App() {
         if (result["ocr_result"] !== null) {
           switch (classifier_number) {
             case 0:
+              let oxy = result["ocr_result"]["oxygen"].toString().concat("%, ")
+                          .concat(result["ocr_result"]["blood_pressure"].toString().concat(" bmp"));
+              setDetail(oxy);
               break;
             case 1:
               break;
