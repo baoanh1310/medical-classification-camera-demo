@@ -2,10 +2,9 @@ import * as ImagePicker from 'expo-image-picker';
 import React from 'react';
 import { Button, Image, StyleSheet, Text, View } from 'react-native';
 import axios from 'axios';
-import Constants from "expo-constants";
-const { manifest } = Constants;
-// const API_URL = `http://${manifest.debuggerHost.split(':').shift()}:5123/predict/`;
 const API_URL = 'http://bk-ocr.ai/medical_classifier/predict/';
+
+import { constants } from './constants.js';
 
 async function callOCRAsync(cameraResult) {
 
@@ -27,12 +26,13 @@ async function callOCRAsync(cameraResult) {
   const result = await response.json();
   console.log('callOCRAsync -> result', result);
 
-  return result.classifier_result;
+  return result;
 }
 
 export default function App() {
   const [image, setImage] = React.useState(null);
   const [status, setStatus] = React.useState(null);
+  const [detail, setDetail] = React.useState(null);
   const [permissions, setPermissions] = React.useState(false);
 
   const askPermissionsAsync = async () => {
@@ -56,14 +56,32 @@ export default function App() {
       setStatus('Loading...');
       try {
         const result = await callOCRAsync(cameraResult);
-        // const result = await callOCRAsync(image);
-        setStatus(result);
+        const classifier_number = result["classifier_number"];
+        const deviceName = constants[classifier_number];
+        setStatus(deviceName);
+        if (result["ocr_result"] !== null) {
+          switch (classifier_number) {
+            case 0:
+              break;
+            case 1:
+              break;
+            case 2:
+              break;
+            case 3:
+              break;
+            case 4:
+              let degree = result["ocr_result"].toString().concat(" °C");
+              setDetail(degree);
+              break;
+          }
+        }
       } catch (error) {
         setStatus(`Error: ${error.message}`);
       }
     } else {
       setImage(null);
       setStatus(null);
+      setDetail(null);
     }
   };
 
@@ -75,6 +93,7 @@ export default function App() {
         <>
           {image && <Image style={styles.image} source={{ uri: image }} />}
           {status && <Text style={styles.text}>{status}</Text>}
+          {detail && <Text style={styles.text}>{detail}</Text>}
           <Button onPress={takePictureAsync} title="Take a Picture" />
         </>
       )}
